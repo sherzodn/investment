@@ -1,0 +1,179 @@
+openapi: 3.0.0
+info:
+  title: Crypto Recommendation Service
+  description: API for retrieving cryptocurrency data and recommendations
+  version: v1
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /api/v1/cryptos/range:
+    get:
+      summary: Get sorted list of cryptos by normalized range
+      operationId: getNormalizedRange
+      description: Returns a descending sorted list of all the cryptos, comparing the normalized range (i.e. (max-min)/min)
+      tags:
+        - cryptos
+      parameters:
+        - $ref: '#/components/parameters/dateFrom'
+        - $ref: '#/components/parameters/dateTo'
+      responses:
+        '200':
+          description: Returns a descending sorted list of all the cryptos, comparing the normalized range (i.e. (max-min)/min)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/cryptoNormalizedListDto'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+  /api/v1/cryptos/statistics/{crypto}:
+    get:
+      summary: Returns the oldest/newest/min/max values for a requested crypto
+      operationId: getStatisticsByCrypto
+      description: Returns the oldest/newest/min/max values for a requested crypto
+      tags:
+        - cryptos
+      parameters:
+        - $ref: '#/components/parameters/crypto'
+        - $ref: '#/components/parameters/dateFrom'
+        - $ref: '#/components/parameters/dateTo'
+      responses:
+        '200':
+          description: Returns the oldest/newest/min/max values for a requested crypto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/cryptoStatisticDto'
+        '404':
+          $ref: '#/components/responses/entity-not-found'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+  /api/v1/cryptos/range/highest/{date}:
+    get:
+      summary: Returns the crypto with the highest normalized range for a specific day
+      operationId: getNormalizedRangeHighest
+      description: Returns the crypto with the highest normalized range for a specific day
+      tags:
+        - cryptos
+      parameters:
+        - $ref: '#/components/parameters/date'
+      responses:
+        '200':
+          description: Returns the crypto with the highest normalized range for a specific day
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/cryptoNormalizedDto'
+        '404':
+          $ref: '#/components/responses/entity-not-found'
+        '500':
+          $ref: '#/components/responses/internal-server-error'
+components:
+  schemas:
+    cryptoNormalizedListDto:
+      type: object
+      title: Collection of cryptoNormalizedDto
+      description: Collection of cryptoNormalizedDto
+      properties:
+        cryptos:
+          type: array
+          items:
+            $ref: '#/components/schemas/cryptoNormalizedDto'
+    cryptoNormalizedDto:
+      type: object
+      title: Crypto normalized range dto
+      description: Crypto normalized range dto
+      properties:
+        symbol:
+          type: String
+          description: Crypto name (eg. BTC)
+        normalizedPrice:
+          type: number
+          format: double
+          description: Normalized range (i.e. (max-min)/min)
+    cryptoStatisticDto:
+      type: object
+      title: Crypto statistic dto object holds oldest/newest/min/max prices
+      properties:
+        symbol:
+          type: String
+          description: Crypto name (eg. BTC)
+        oldest:
+          type: number
+          format: double
+          description: Oldest price
+        newest:
+          type: number
+          format: double
+          description: Newest price
+        min:
+          type: number
+          format: double
+          description: Min price
+        max:
+          type: number
+          format: double
+          description: Max price
+  responses:
+    internal-server-error:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: A message describing the error that occurred.
+    bad-request:
+      description: Error response if request body contains validation error (in json format)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: A message describing the error that occurred.
+    entity-not-found:
+      description: Error response if entity is not found by id (in json format)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: A message describing the error that occurred.
+  parameters:
+    crypto:
+      in: path
+      required: true
+      name: crypto
+      description: crypto symbol (e.g BTC)
+      schema:
+        type: string
+    dateFrom:
+      in: query
+      name: dateFrom
+      schema:
+        type: string
+        format: date
+      description: The start date for the query (YYYY-MM-DD).
+      required: false
+    dateTo:
+      in: query
+      name: dateTo
+      schema:
+        type: string
+        format: date
+      description: The end date for the query (YYYY-MM-DD).
+      required: false
+    date:
+      in: path
+      name: date
+      schema:
+        type: string
+        pattern: ^(?!0000)[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$
+      description: String date in ISO format like YYYY-MM-DD"
+      required: true

@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: investment
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: false
+      accept-single-value-as-array: true
+  datasource:
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_DATABASE:postgres}
+  jpa:
+    open-in-view: false
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQL94Dialect
+  redis:
+   host: ${REDIS_HOST:localhost}
+   port: ${REDIS_PORT:6379}
+   password: ${REDIS_PASSWORD:}
+
+server:
+  port: 8080
+
+springdoc:
+  api-docs:
+    path: /api-docs
+
+crypto:
+  location-pattern: "classpath:prices/*_values.csv"
+
+# this configuration will limit the number of requests a client can make to any API endpoint that
+# matches the "/api/.*" URL pattern to a maximum of 5 requests every 10 seconds, based on the client's IP address
+bucket4j:
+  enabled: true
+  filters:
+    - cache-name: rate-limit
+      hide-http-response-headers: false
+      url: /api/.*
+      filter-method: servlet
+      rate-limits:
+        - expression: "getRemoteAddr()"
+          bandwidths:
+            - capacity: 5
+              time: 10
+              unit: seconds
+
+management:
+  endpoints.web:
+    base-path: /admin
+    exposure.include: info,health,threaddump,heapdump
