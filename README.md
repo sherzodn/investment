@@ -46,6 +46,9 @@ server stubs, and other API-related components.
 This can save time and effort when building applications that consume or provide APIs. Here is yaml file:
 `/src/main/resources/swagger.api/crypto.yaml`
 
+Note: If you don't see generated codes when working in Intellij Idea, mark directory as a source root as shown in the following screenshot
+![img.png](doc/img.png)
+
 Initially the cryptos are only five, but what if we want to include more? Will the recommendation service be able to scale?
 ------
 Certainly, If you wish to add more than the initial five cryptocurrencies, the recommendation service 
